@@ -4,26 +4,26 @@ use std::process::Child;
 
 #[derive(Debug, Clone)]
 pub struct RadeonData {
-    timestamp: f64,
-    bus: f64,
-    gpu: f64,
-    ee: f64,
-    vgt: f64,
-    ta: f64,
-    tc: f64,
-    sx: f64,
-    sh: f64,
-    spi: f64,
-    smx: f64,
-    cr: f64,
-    sc: f64,
-    pa: f64,
-    db: f64,
-    cb: f64,
-    vram: f64,
-    gtt: f64,
-    mclk: f64,
-    sclk: f64,
+    pub timestamp: f64,
+    pub bus: f64,
+    pub gpu: f64,
+    pub ee: f64,
+    pub vgt: f64,
+    pub ta: f64,
+    pub tc: f64,
+    pub sx: f64,
+    pub sh: f64,
+    pub spi: f64,
+    pub smx: f64,
+    pub cr: f64,
+    pub sc: f64,
+    pub pa: f64,
+    pub db: f64,
+    pub cb: f64,
+    pub vram: f64,
+    pub gtt: f64,
+    pub mclk: f64,
+    pub sclk: f64,
 }
 
 pub struct RadeonListener {
@@ -58,7 +58,6 @@ impl RadeonListener {
 
 fn parse_radeontop_line(line: &str) -> Result<RadeonData, Box<dyn Error>> {
     // use regular expression to parse the sample line "1708806303.77193: bus 03, gpu 3.33%, ee 0.00%, vgt 0.83%, ta 0.00%, tc 0.00%, sx 0.83%, sh 0.83%, spi 0.83%, smx 0.83%, cr 4.17%, sc 0.83%, pa 0.00%, db 0.83%, cb 0.83%, vram 6.08% 1489.07mb, gtt 0.39% 126.32mb, mclk 7.69% 0.096ghz, sclk 4.12% 0.098ghz" into RadeonData struct
-    println!("parsing line {:?}", line);
     let re = regex::Regex::new(
         r"(\d+).(\d+): bus (\d+), gpu ([\d.]+)%, ee ([\d.]+)%, vgt ([\d.]+)%, ta ([\d.]+)%, tc ([\d.]+)%, sx ([\d.]+)%, sh ([\d.]+)%, spi ([\d.]+)%, smx ([\d.]+)%, cr ([\d.]+)%, sc ([\d.]+)%, pa ([\d.]+)%, db ([\d.]+)%, cb ([\d.]+)%, vram ([\d.]+)% ([\d.]+)mb, gtt ([\d.]+)% ([\d.]+)mb, mclk ([\d.]+)% ([\d.]+)ghz, sclk ([\d.]+)% ([\d.]+)ghz",
     )?;

@@ -28,6 +28,17 @@ pub fn run_server(mut listener: RadeonListener, port: i32) -> Result<(), Box<dyn
     loop {
         let req = server.recv()?;
         let data = state.lock().unwrap();
-        req.respond(tiny_http::Response::from_string(format!("{:?}", data)))?;
+        let res_str = match &*data {
+            Some(data) => tiny_http::Response::from_string(write_response(&data)),
+            None => tiny_http::Response::from_string(""),
+        };
+        if let Err(err) = req.respond(res_str) {
+            println!("Failed to respond to request: {}", err);
+        }
     }
+}
+
+fn write_response(data: &RadeonData) -> String {
+    // write all fields into a string using prometheus node exporter format
+    format!("radeon_gpu_percentile {}\n", data.gpu)
 }
