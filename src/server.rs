@@ -1,29 +1,33 @@
-use std::error;
+use std::{error, thread};
+use std::sync::{Arc, Mutex};
 
-use crate::radeontop::RadeonListener;
+use crate::radeontop::{RadeonData, RadeonListener};
 
-pub struct Server {
-    pub listener: RadeonListener,
-    pub port: i32,
-}
+pub fn run_server(mut listener: RadeonListener, port: i32) -> Result<(), Box<dyn error::Error>> {
+    let state = Arc::new(Mutex::new(Option::<RadeonData>::None));
 
-impl Server {
-    pub fn new(listener: RadeonListener, port: i32) -> Result<Server, Box<dyn error::Error>> {
-        Ok(Self { listener, port })
+    // trigger listener in a different thread so data don't get stale
+    {
+        let thread_state = state.clone();
+        thread::spawn(move || loop {
+            let data = listener.next().unwrap();
+            let mut state = thread_state.lock().unwrap();
+            *state = Some(data);
+        });
     }
 
-    pub fn run(&mut self) -> Result<(), Box<dyn error::Error>> {
-        let server = match tiny_http::Server::http(format!("0.0.0.0:{}", self.port)) {
-            Ok(value) => value,
-            Err(err) => {
-                return Err(format!("Failed to start server: {}", err).into());
-            }
-        };
-
-        loop {
-            let req = server.recv()?;
-            let data = self.listener.next()?;
-            req.respond(tiny_http::Response::from_string(format!("{:?}", data)))?;
+    // instantiate server
+    let server = match tiny_http::Server::http(format!("0.0.0.0:{}", port)) {
+        Ok(value) => value,
+        Err(err) => {
+            return Err(format!("Failed to start server: {}", err).into());
         }
+    };
+
+    // handle requests
+    loop {
+        let req = server.recv()?;
+        let data = state.lock().unwrap();
+        req.respond(tiny_http::Response::from_string(format!("{:?}", data)))?;
     }
 }

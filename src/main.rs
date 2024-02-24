@@ -5,6 +5,6 @@ mod radeontop;
 mod server;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    server::Server::new(radeontop::RadeonListener::new()?, 9101)?.run()?;
+    server::run_server(radeontop::RadeonListener::new()?, 9101)?;
     Ok(())
 }
