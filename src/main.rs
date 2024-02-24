@@ -2,12 +2,9 @@ use std::error::Error;
 use std::io::BufRead;
 
 mod radeontop;
+mod server;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut listener = radeontop::RadeonListener::new()?;
-    loop {
-        let data = listener.next();
-        println!("{:?}", data);
-    }
+    server::Server::new(radeontop::RadeonListener::new()?, 9101)?.run()?;
     Ok(())
 }
